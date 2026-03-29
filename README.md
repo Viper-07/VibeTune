@@ -1,70 +1,69 @@
-# Getting Started with Create React App
+# Mood Music Player
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+AI mood detection + Spotify soundtracks in one page.
 
-## Available Scripts
+## How it works
+- You describe how you feel (a short sentence is enough).
+- The app sends your text to Anthropic and expects strict JSON back (mood, label, reflection, search query, intensity).
+- Based on the detected mood, the app queries Spotify and shows preview tracks.
 
-In the project directory, you can run:
+## Setup (local development)
 
-### `npm start`
+### 1) Install dependencies
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+npm install
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 2) Configure Anthropic
 
-### `npm test`
+Create `.env.local` in the project root:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```env
+REACT_APP_ANTHROPIC_API_KEY=sk-ant-...
+```
 
-### `npm run build`
+Notes:
+- Do not commit secrets. This project uses `.env.local` (and it is typically gitignored).
+- After editing `.env.local`, restart the dev server so CRA can load the new env vars.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 3) Run the app
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+npm start
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Open:
+- `https://localhost:3001`
 
-### `npm run eject`
+## HTTPS / “Not secure” warning
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+This repo is configured to run the dev server over HTTPS. If your browser still warns:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+mkcert -install
+mkcert -cert-file certs/localhost.crt -key-file certs/localhost.key localhost 127.0.0.1 ::1
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Then restart `npm start`.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Spotify token (paste in the UI)
 
-## Learn More
+When you open the app, paste your Spotify access token on the setup screen.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+If you see errors like “Spotify token expired”, paste a fresh token.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Common errors
 
-### Code Splitting
+- `invalid x-api-key`
+  - Your Anthropic API key is incorrect. Anthropic keys should start with `sk-ant-`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- “Set REACT_APP_ANTHROPIC_API_KEY…”
+  - `.env.local` is missing or the dev server was not restarted after updating it.
 
-### Analyzing the Bundle Size
+- “Could not analyze mood…”
+  - The Anthropic response was not valid JSON or the request failed. Check the Anthropic key first.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Security note
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This demo calls Anthropic directly from the browser, which exposes your key to anyone who can access the frontend bundle. For a public deployment, move the Anthropic call to a backend and keep secrets server-side.
